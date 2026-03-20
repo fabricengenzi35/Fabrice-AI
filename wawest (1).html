@@ -12,6 +12,26 @@
 <meta name="theme-color" content="#070810" id="themeColorMeta">
 <title>Fabrice AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    packages: {'[+]': ['ams']},
+    tags: 'ams'
+  },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+    processHtmlClass: 'math-content'
+  },
+  startup: {
+    ready() {
+      MathJax.startup.defaultReady();
+    }
+  }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -646,6 +666,102 @@ tr:nth-child(even) td { background:rgba(91,110,245,0.04); }
   font-family:'Plus Jakarta Sans',sans-serif;
 }
 .dl-btn:hover{opacity:0.9;transform:scale(1.02);}
+
+/* ── MATH SYMBOL KEYBOARD ── */
+.math-keyboard {
+  display:none;
+  flex-direction:column;
+  gap:6px;
+  padding:10px 14px 6px;
+  background:var(--toolbar-bg);
+  border-top:1px solid var(--border);
+  transition:background 0.3s,border-color 0.3s;
+}
+.math-keyboard.open { display:flex; }
+.math-kb-tabs {
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+}
+.math-kb-tab {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:4px 10px;
+  font-size:11px;
+  color:var(--text2);
+  cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all 0.2s;
+}
+.math-kb-tab.active, .math-kb-tab:hover {
+  background:rgba(91,110,245,0.2);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.math-kb-grid {
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+.math-sym-btn {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:5px 8px;
+  min-width:36px;
+  font-size:14px;
+  color:var(--text);
+  cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  transition:all 0.15s;
+  text-align:center;
+  line-height:1.2;
+}
+.math-sym-btn:hover, .math-sym-btn:active {
+  background:rgba(91,110,245,0.2);
+  border-color:var(--accent);
+  color:var(--accent2);
+  transform:scale(1.05);
+}
+.math-kb-close {
+  background:none;
+  border:none;
+  color:var(--text3);
+  cursor:pointer;
+  font-size:16px;
+  align-self:flex-end;
+  padding:2px 6px;
+}
+.math-kb-close:hover { color:var(--text); }
+
+/* ── MATH RENDERED OUTPUT ── */
+.bubble .MathJax { font-size:1em !important; }
+.bubble mjx-container { display:inline !important; }
+.bubble .math-block mjx-container { display:block !important; margin:8px 0 !important; }
+
+/* ── MATH CALC PANEL ── */
+.math-calc-btn {
+  display:flex;align-items:center;gap:5px;
+  background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.25);
+  border-radius:8px;padding:6px 12px;
+  color:var(--teal);font-size:12px;font-weight:600;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all 0.2s;
+}
+.math-calc-btn:hover { background:rgba(0,212,170,0.15); }
+
+.math-kb-toggle-btn {
+  display:flex;align-items:center;gap:5px;
+  background:rgba(91,110,245,0.08);border:1px solid rgba(91,110,245,0.25);
+  border-radius:8px;padding:6px 12px;
+  color:var(--accent2);font-size:12px;font-weight:600;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all 0.2s;
+}
+.math-kb-toggle-btn:hover { background:rgba(91,110,245,0.18); }
 </style>
 </head>
 <body>
@@ -698,16 +814,29 @@ tr:nth-child(even) td { background:rgba(91,110,245,0.04); }
     <option value="nl">🇳🇱 Nederlands</option>
     <option value="pl">🇵🇱 Polski</option>
   </select>
-  <button class="t-btn" onclick="quickMsg('Write code for: ')">⌨️ Code</button>
+  <button class="t-btn" onclick="quickMsg('Write code for: ')\">⌨️ Code</button>
   <button class="t-btn" onclick="quickMsg('Translate this to '+langNames[currentLang]+': ')">🌐 Translate</button>
   <button class="t-btn" onclick="quickMsg('Summarize: ')">📝 Summarize</button>
   <button class="t-btn" onclick="quickMsg('Analyze and explain: ')">🔍 Analyze</button>
   <button class="t-btn" onclick="quickMsg('Write a detailed essay about: ')">✍️ Write</button>
   <button class="t-btn" onclick="quickMsg('Create a step-by-step plan for: ')">🗺️ Plan</button>
   <button class="t-btn" onclick="quickMsg('Debug this code:\n')">🐛 Debug</button>
+  <button class="math-kb-toggle-btn" onclick="toggleMathKeyboard()">∑ Symbols</button>
+  <button class="math-calc-btn" onclick="quickMsg('Solve step by step: ')">🧮 Solve</button>
+  <button class="t-btn" onclick="quickMsg('Graph and explain the function: ')">📈 Graph</button>
   <button class="t-btn" onclick="exportChat()">💾 Export</button>
   <button class="t-btn" onclick="clearChat()">🗑️ Clear</button>
-  <div class="model-badge">⚡ FREE · FAST</div>
+  <div class="model-badge">⚡ FREE · MATH+</div>
+</div>
+
+<!-- MATH SYMBOL KEYBOARD -->
+<div class="math-keyboard" id="mathKeyboard">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <span style="font-size:11px;color:var(--text3);font-weight:600;">INSERT MATH SYMBOL — click to insert into message</span>
+    <button class="math-kb-close" onclick="toggleMathKeyboard()">✕</button>
+  </div>
+  <div class="math-kb-tabs" id="mathKbTabs"></div>
+  <div class="math-kb-grid" id="mathKbGrid"></div>
 </div>
 
 <!-- API BANNER -->
@@ -742,6 +871,14 @@ tr:nth-child(even) td { background:rgba(91,110,245,0.04); }
       <div class="cap" onclick="sendSuggestion('What are the latest breakthroughs in AI and machine learning in 2024-2025?')">
         <div class="cap-ic" style="background:rgba(0,200,100,0.15)">🤖</div>
         <div><div class="cap-t">AI & Tech</div><div class="cap-d">Latest in technology</div></div>
+      </div>
+      <div class="cap" onclick="sendSuggestion('Solve this step by step and explain every step: Integrate x²·sin(x) dx')">
+        <div class="cap-ic" style="background:rgba(255,100,200,0.15)">∫</div>
+        <div><div class="cap-t">Math Solver</div><div class="cap-d">Calculus, algebra & more</div></div>
+      </div>
+      <div class="cap" onclick="sendSuggestion('Explain all major mathematical symbols used in calculus and linear algebra with examples')">
+        <div class="cap-ic" style="background:rgba(100,180,255,0.15)">∑</div>
+        <div><div class="cap-t">Math Symbols</div><div class="cap-d">Full symbol reference</div></div>
       </div>
     </div>
   </div>
@@ -1049,6 +1186,7 @@ function addMessage(role, content, atts) {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 
   msgCount++;
+  if (role === 'ai') renderMath(bbl);
 }
 
 // ── TYPING ──
@@ -1155,6 +1293,105 @@ function formatText(text) {
   return text;
 }
 
+// ── MATH SYMBOL KEYBOARD ──
+const mathSymbols = {
+  'Greek': [
+    {sym:'α',ins:'α'},  {sym:'β',ins:'β'},  {sym:'γ',ins:'γ'},  {sym:'δ',ins:'δ'},
+    {sym:'ε',ins:'ε'},  {sym:'ζ',ins:'ζ'},  {sym:'η',ins:'η'},  {sym:'θ',ins:'θ'},
+    {sym:'λ',ins:'λ'},  {sym:'μ',ins:'μ'},  {sym:'π',ins:'π'},  {sym:'ρ',ins:'ρ'},
+    {sym:'σ',ins:'σ'},  {sym:'τ',ins:'τ'},  {sym:'φ',ins:'φ'},  {sym:'χ',ins:'χ'},
+    {sym:'ψ',ins:'ψ'},  {sym:'ω',ins:'ω'},  {sym:'Γ',ins:'Γ'},  {sym:'Δ',ins:'Δ'},
+    {sym:'Θ',ins:'Θ'},  {sym:'Λ',ins:'Λ'},  {sym:'Σ',ins:'Σ'},  {sym:'Φ',ins:'Φ'},
+    {sym:'Ψ',ins:'Ψ'},  {sym:'Ω',ins:'Ω'},
+  ],
+  'Arithmetic': [
+    {sym:'±',ins:'±'}, {sym:'∓',ins:'∓'}, {sym:'×',ins:'×'}, {sym:'÷',ins:'÷'},
+    {sym:'√',ins:'√'}, {sym:'∛',ins:'∛'}, {sym:'∜',ins:'∜'}, {sym:'∞',ins:'∞'},
+    {sym:'≠',ins:'≠'}, {sym:'≈',ins:'≈'}, {sym:'≅',ins:'≅'}, {sym:'≡',ins:'≡'},
+    {sym:'≤',ins:'≤'}, {sym:'≥',ins:'≥'}, {sym:'≪',ins:'≪'}, {sym:'≫',ins:'≫'},
+    {sym:'∝',ins:'∝'}, {sym:'∴',ins:'∴'}, {sym:'∵',ins:'∵'}, {sym:'|x|',ins:'|x|'},
+  ],
+  'Calculus': [
+    {sym:'∫',ins:'∫'},  {sym:'∬',ins:'∬'},  {sym:'∭',ins:'∭'},  {sym:'∮',ins:'∮'},
+    {sym:'∂',ins:'∂'},  {sym:'∇',ins:'∇'},  {sym:'Δ',ins:'Δ'},  {sym:'δ',ins:'δ'},
+    {sym:'∑',ins:'∑'},  {sym:'∏',ins:'∏'},  {sym:'lim',ins:'lim'},{sym:'→',ins:'→'},
+    {sym:'dx',ins:'dx'}, {sym:'dy',ins:'dy'}, {sym:'d²',ins:'d²'}, {sym:'∞',ins:'∞'},
+    {sym:'d/dx',ins:'d/dx'}, {sym:'∂/∂x',ins:'∂/∂x'},
+  ],
+  'Logic/Sets': [
+    {sym:'∀',ins:'∀'}, {sym:'∃',ins:'∃'}, {sym:'∄',ins:'∄'}, {sym:'∈',ins:'∈'},
+    {sym:'∉',ins:'∉'}, {sym:'⊂',ins:'⊂'}, {sym:'⊆',ins:'⊆'}, {sym:'⊃',ins:'⊃'},
+    {sym:'⊇',ins:'⊇'}, {sym:'∪',ins:'∪'}, {sym:'∩',ins:'∩'}, {sym:'∅',ins:'∅'},
+    {sym:'∖',ins:'∖'}, {sym:'∧',ins:'∧'}, {sym:'∨',ins:'∨'}, {sym:'¬',ins:'¬'},
+    {sym:'⇒',ins:'⇒'}, {sym:'⟺',ins:'⟺'}, {sym:'∴',ins:'∴'}, {sym:'□',ins:'□'},
+  ],
+  'LaTeX': [
+    {sym:'x²',ins:'$x^2$'},    {sym:'xⁿ',ins:'$x^n$'},   {sym:'√x',ins:'$\\sqrt{x}$'},
+    {sym:'ⁿ√x',ins:'$\\sqrt[n]{x}$'},{sym:'x/y',ins:'$\\frac{x}{y}$'},{sym:'∫dx',ins:'$\\int f(x)\\,dx$'},
+    {sym:'∑i',ins:'$\\sum_{i=1}^{n}$'},{sym:'∏i',ins:'$\\prod_{i=1}^{n}$'},{sym:'lim→',ins:'$\\lim_{x\\to\\infty}$'},
+    {sym:'∂/∂x',ins:'$\\frac{\\partial f}{\\partial x}$'},{sym:'matrix',ins:'$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$'},
+    {sym:'vec',ins:'$\\vec{v}$'},{sym:'hat',ins:'$\\hat{x}$'},{sym:'bar',ins:'$\\bar{x}$'},
+    {sym:'∞',ins:'$\\infty$'},{sym:'π',ins:'$\\pi$'},{sym:'e',ins:'$e$'},
+    {sym:'i',ins:'$i$'},{sym:'≈',ins:'$\\approx$'},{sym:'±',ins:'$\\pm$'},
+  ],
+  'Numbers': [
+    {sym:'ℕ',ins:'ℕ'}, {sym:'ℤ',ins:'ℤ'}, {sym:'ℚ',ins:'ℚ'}, {sym:'ℝ',ins:'ℝ'},
+    {sym:'ℂ',ins:'ℂ'}, {sym:'ℙ',ins:'ℙ'}, {sym:'ℍ',ins:'ℍ'},
+    {sym:'⊕',ins:'⊕'}, {sym:'⊗',ins:'⊗'}, {sym:'⊥',ins:'⊥'}, {sym:'∥',ins:'∥'},
+    {sym:'∠',ins:'∠'}, {sym:'°',ins:'°'}, {sym:'′',ins:'′'}, {sym:'″',ins:'″'},
+  ]
+};
+
+let currentMathTab = 'Greek';
+
+function buildMathKeyboard() {
+  const tabsEl = document.getElementById('mathKbTabs');
+  const gridEl = document.getElementById('mathKbGrid');
+  tabsEl.innerHTML = '';
+  Object.keys(mathSymbols).forEach(cat => {
+    const tab = document.createElement('button');
+    tab.className = 'math-kb-tab' + (cat === currentMathTab ? ' active' : '');
+    tab.textContent = cat;
+    tab.onclick = () => { currentMathTab = cat; buildMathKeyboard(); };
+    tabsEl.appendChild(tab);
+  });
+  gridEl.innerHTML = '';
+  mathSymbols[currentMathTab].forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'math-sym-btn';
+    btn.textContent = item.sym;
+    btn.title = 'Insert: ' + item.ins;
+    btn.onclick = () => insertMathSymbol(item.ins);
+    gridEl.appendChild(btn);
+  });
+}
+
+function toggleMathKeyboard() {
+  const kb = document.getElementById('mathKeyboard');
+  kb.classList.toggle('open');
+  if (kb.classList.contains('open')) buildMathKeyboard();
+}
+
+function insertMathSymbol(sym) {
+  const ta = document.getElementById('userInput');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const val = ta.value;
+  ta.value = val.substring(0, start) + sym + val.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + sym.length;
+  ta.focus();
+  autoResize(ta);
+  sendBtnEl.disabled = !(ta.value.trim().length > 0 || attachments.length > 0);
+}
+
+// ── MATHJAX RENDERING ──
+function renderMath(el) {
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([el]).catch(err => console.log('MathJax error:', err));
+  }
+}
+
+
 // ── SYSTEM PROMPT ──
 function buildSystemPrompt() {
   const langInstruction = langInstructions[currentLang] || langInstructions.en;
@@ -1173,10 +1410,21 @@ You were invented and created by **Scientist NGENZI FABRICE** from **Rwanda**. O
 
 ## Capabilities
 - **All programming languages** — write production-ready, well-commented code
-- **Math** — solve equations and proofs with step-by-step solutions
+- **Math** — solve equations and proofs with step-by-step solutions. Always use LaTeX notation: inline math with $...$ and display math with $$...$$ so formulas render beautifully. Use proper mathematical notation for all symbols.
 - **Analysis** — deep analysis of text, data, and arguments
 - **Creative writing** — stories, poems, scripts with genuine literary quality
 - **Multilingual** — native fluency in all 16 supported languages including Kinyarwanda
+
+## Mathematical Excellence
+When solving math problems:
+1. Show ALL steps clearly — never skip steps
+2. Use LaTeX for every mathematical expression: $x^2 + 3x - 4 = 0$, $$\\int_0^\\infty e^{-x^2}dx = \\frac{\\sqrt{\\pi}}{2}$$
+3. Define all variables and notation used
+4. Box or highlight the final answer
+5. For calculus: show the method (u-substitution, integration by parts, etc.)
+6. For proofs: state the theorem, method, and QED
+7. For statistics: show formulas then numerical computation
+8. Use correct symbols: ∈, ∉, ⊂, ⊆, ∪, ∩, ∅, ∀, ∃, ⇒, ⟺, ∇, ∂, ∫, ∑, ∏, ±, ≈, ≡, ∝, ∞
 
 ## Language Detection & Response Rule (MOST IMPORTANT)
 You MUST detect the language of each user message and ALWAYS respond in that EXACT same language — no exceptions.
@@ -1605,6 +1853,10 @@ function updateStreamingMessage(bubble, text) {
   const displayText = text.replace(/%%DOWNLOAD_DOC%%[\s\S]*?%%END_DOC%%/g, '').replace(/%%DOWNLOAD_DOC%%[\s\S]*/g, '');
   bubble.innerHTML = formatText(displayText);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  // Render math if we see LaTeX-style content
+  if (text.includes('$') || text.includes('\\[') || text.includes('\\(')) {
+    renderMath(bubble);
+  }
 }
 
 
@@ -1701,6 +1953,8 @@ function finaliseStreamingMessage(bubble, fullText) {
   if (fullText && fullText.includes('%%DOWNLOAD_DOC%%')) {
     checkAndRenderDownload(bubble, fullText);
   }
+  // Final math render pass
+  renderMath(bubble);
 }
 </script>
 </body>
