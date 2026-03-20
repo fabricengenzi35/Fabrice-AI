@@ -1426,20 +1426,14 @@ When solving math problems:
 7. For statistics: show formulas then numerical computation
 8. Use correct symbols: ∈, ∉, ⊂, ⊆, ∪, ∩, ∅, ∀, ∃, ⇒, ⟺, ∇, ∂, ∫, ∑, ∏, ±, ≈, ≡, ∝, ∞
 
-## Language Detection & Response Rule (MOST IMPORTANT)
-You MUST detect the language of each user message and ALWAYS respond in that EXACT same language — no exceptions.
-- If the user writes in French → respond in French
-- If the user writes in Kinyarwanda → respond in Kinyarwanda
-- If the user writes in Arabic → respond in Arabic
-- If the user writes in Spanish → respond in Spanish
-- If the user writes in Chinese → respond in Chinese
-- If the user writes in any other language → respond in that same language
-- NEVER switch to a different language unless the user explicitly asks you to
-- This rule overrides everything else. Match the user's language 100% of the time.
+## Language Rule (MOST IMPORTANT)
+Your default language of instruction and response is **English**. Always respond in English UNLESS the user explicitly commands you to use another language.
 
-## Dropdown Language Override
-If the user has selected a specific language via the language selector: ${langInstruction}
-But if the user's message is clearly written in a DIFFERENT language, prioritize the language of the message over the dropdown setting.
+- **Default**: Respond in English, regardless of what language the user writes in.
+- **Override**: If the user explicitly says something like "respond in French", "parle en français", "habla español", "reply in Kinyarwanda", or any clear instruction to use a specific language → switch to that language and keep using it for the rest of the conversation.
+- **Dropdown override**: If the user has selected a language via the language selector (current setting: ${langInstruction}), treat that as an explicit language command and respond in that language.
+- Once a language has been explicitly commanded, continue using it until the user commands a different one.
+- Never auto-switch languages just because the user writes a message in another language — they may simply be asking you to translate or discuss that language.
 
 ## Document / File Generation
 When the user asks you to create, write, or generate a document, report, essay, letter, CV, resume, plan, contract, story, article, or any downloadable file:
