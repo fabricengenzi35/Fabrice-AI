@@ -400,16 +400,74 @@ body::before{
 .bubble td{padding:5px 10px;border:1px solid var(--border);}
 .bubble tr:nth-child(even) td{background:rgba(91,110,245,0.03);}
 
-/* ── TYPING ── */
-.typing-dots{
-  display:flex;align-items:center;gap:4px;padding:12px 16px;
+/* ── THINKING INDICATOR ── */
+.thinking-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
 }
-.typing-dots span{
-  width:6px;height:6px;border-radius:50%;background:var(--accent);
-  animation:dot 1.4s infinite;
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.typing-dots span:nth-child(2){animation-delay:0.2s;}
-.typing-dots span:nth-child(3){animation-delay:0.4s;}
+.thinking-orb {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  animation: orbPulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px var(--glow);
+}
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 16px var(--glow); }
+  50% { transform: scale(1.12); box-shadow: 0 0 28px var(--glow), 0 0 50px rgba(91,110,245,0.15); }
+}
+.thinking-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.thinking-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent2);
+  letter-spacing: 0.3px;
+}
+.thinking-status {
+  font-size: 11px;
+  color: var(--text3);
+  animation: fadeStatus 3s ease-in-out infinite;
+}
+@keyframes fadeStatus {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.thinking-bar-wrap {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.thinking-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--teal), var(--accent));
+  background-size: 200% 100%;
+  animation: barSlide 1.6s linear infinite;
+  width: 45%;
+}
+@keyframes barSlide {
+  0%   { background-position: 200% 0; margin-left: -45%; }
+  100% { background-position: -200% 0; margin-left: 110%; }
+}
+.thinking-dots {
+  display: none;
+}
 @keyframes dot{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-5px);opacity:1}}
 
 /* ── INPUT AREA ── */
@@ -503,16 +561,22 @@ textarea#userInput::placeholder{color:var(--text3);}
   width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0;
 }
 .preview-item .pname{
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text2);display:block;
+}
+.preview-item .pinfo{
+  flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden;
+}
+.preview-item .pread{
+  font-size:9px;font-weight:700;letter-spacing:0.3px;display:block;
 }
 .preview-item .pdel{
   width:16px;height:16px;border-radius:50%;
-  background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);
-  color:#fca5a5;display:flex;align-items:center;justify-content:center;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text3);display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:10px;flex-shrink:0;
   transition:all 0.15s;
 }
-.preview-item .pdel:hover{background:rgba(239,68,68,0.4);}
+.preview-item .pdel:hover{background:rgba(239,68,68,0.25);border-color:rgba(239,68,68,0.5);color:#fca5a5;}
 .preview-file-icon{font-size:22px;flex-shrink:0;}
 
 
@@ -550,6 +614,241 @@ textarea,input,select{transition:background 0.3s,border-color 0.2s,color 0.3s!im
   background:none; border:none; color:var(--text3);
   cursor:pointer; font-size:18px; padding:0 4px; flex-shrink:0;
 }
+
+/* ── HTML UPGRADER MODAL ── */
+.upgrader-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeUp 0.2s ease;
+}
+.upgrader-overlay.open { display: flex; }
+
+.upgrader-modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  width: min(96vw, 560px);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.upgrader-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.upgrader-header-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.upgrader-header-title { flex: 1; }
+.upgrader-header-title h3 { font-size: 14px; font-weight: 700; color: var(--text); }
+.upgrader-header-title p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.upgrader-close {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s;
+}
+.upgrader-close:hover { background: rgba(239,68,68,0.15); color: #fca5a5; border-color: rgba(239,68,68,0.3); }
+
+.upgrader-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.upgrader-dropzone {
+  border: 2px dashed var(--border2);
+  border-radius: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface2);
+  position: relative;
+}
+.upgrader-dropzone:hover, .upgrader-dropzone.drag-over {
+  border-color: var(--accent);
+  background: rgba(91,110,245,0.06);
+}
+.upgrader-dropzone input[type=file] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.upgrader-dropzone-icon { font-size: 32px; margin-bottom: 8px; }
+.upgrader-dropzone-text { font-size: 13px; font-weight: 600; color: var(--text2); }
+.upgrader-dropzone-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+.upgrader-file-loaded {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.25);
+  border-radius: 12px; padding: 10px 14px;
+}
+.upgrader-file-loaded .ufl-icon { font-size: 22px; flex-shrink: 0; }
+.upgrader-file-loaded .ufl-name { font-size: 12px; font-weight: 600; color: var(--teal); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upgrader-file-loaded .ufl-size { font-size: 10px; color: var(--text3); }
+.upgrader-file-clear {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 16px; padding: 0 4px; flex-shrink: 0;
+  transition: color 0.2s;
+}
+.upgrader-file-clear:hover { color: #fca5a5; }
+
+.upgrader-label { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: -8px; }
+
+.upgrader-instructions {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 90px;
+  max-height: 200px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.upgrader-instructions:focus { border-color: var(--accent); }
+.upgrader-instructions::placeholder { color: var(--text3); }
+
+.upgrader-quick-btns {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.upgrader-quick-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text2); border-radius: 20px;
+  padding: 4px 12px; font-size: 11px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.2s;
+}
+.upgrader-quick-btn:hover { background: rgba(91,110,245,0.12); border-color: var(--accent); color: var(--accent); }
+
+.upgrader-run-btn {
+  background: linear-gradient(135deg, var(--accent), var(--teal));
+  color: white; border: none; border-radius: 12px;
+  padding: 13px 20px; font-size: 14px; font-weight: 700;
+  cursor: pointer; width: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: opacity 0.2s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.upgrader-run-btn:hover { opacity: 0.9; }
+.upgrader-run-btn:active { transform: scale(0.98); }
+.upgrader-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.upgrader-status {
+  display: none;
+  background: rgba(91,110,245,0.08);
+  border: 1px solid rgba(91,110,245,0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.upgrader-status.show { display: block; }
+.upgrader-status-title { font-weight: 700; color: var(--accent2); margin-bottom: 4px; font-size: 13px; }
+
+.upgrader-result {
+  display: none;
+  background: rgba(0,212,170,0.07);
+  border: 1px solid rgba(0,212,170,0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  gap: 12px;
+  align-items: center;
+}
+.upgrader-result.show { display: flex; }
+.upgrader-result-icon { font-size: 28px; flex-shrink: 0; }
+.upgrader-result-info { flex: 1; }
+.upgrader-result-title { font-size: 13px; font-weight: 700; color: var(--teal); }
+.upgrader-result-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.upgrader-dl-btn {
+  background: linear-gradient(135deg, var(--teal), #00a88a);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 9px 16px; font-size: 12px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  text-decoration: none; display: inline-block;
+  transition: opacity 0.2s;
+}
+.upgrader-dl-btn:hover { opacity: 0.85; }
+
+/* ── RELATED QUESTIONS CHIPS ── */
+.bubble .related-qs {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.bubble .related-qs-title {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 7px;
+}
+.bubble .rq-chip {
+  display: inline-block;
+  background: rgba(91,110,245,0.08);
+  border: 1px solid rgba(91,110,245,0.25);
+  color: var(--accent2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  margin: 3px 3px 3px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.bubble .rq-chip:hover {
+  background: rgba(91,110,245,0.18);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+
+/* ── FILE ATTACHMENT CHIPS ── */
+.att-chip {
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:5px 10px;font-size:11.5px;
+  color:var(--text2);transition:all 0.3s;
+}
+.att-chip.att-processing {
+  border-color:var(--gold);background:rgba(255,209,102,0.08);
+  animation:attPulse 1.4s ease-in-out infinite;
+}
+.att-chip.att-done {
+  border-color:var(--teal);background:rgba(0,212,170,0.07);
+}
+@keyframes attPulse {
+  0%,100%{opacity:1} 50%{opacity:0.6}
+}
+.att-chip-icon { font-size:14px; flex-shrink:0; }
+.att-chip-name { font-weight:600; color:var(--text); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.att-chip-status { font-size:10px; font-weight:700; letter-spacing:0.3px; flex-shrink:0; border-radius:6px; padding:2px 6px; }
+.att-chip-status.ready   { color:var(--text3); background:rgba(255,255,255,0.05); }
+.att-chip-status.processing { color:var(--gold); background:rgba(255,209,102,0.12); }
+.att-chip-status.done    { color:var(--teal); background:rgba(0,212,170,0.12); }
+
+/* ── PREVIEW READ BADGES ── */
+.pread--ready  { color:var(--teal)!important; font-size:9px!important; font-weight:700!important; }
+.pread--noread { color:var(--text3)!important; font-size:9px!important; }
 
 /* ── SMOOTH THEME SWITCH ── */
 .theme-switching *{
@@ -826,7 +1125,78 @@ tr:nth-child(even) td { background:rgba(91,110,245,0.04); }
   <button class="t-btn" onclick="quickMsg('Graph and explain the function: ')">📈 Graph</button>
   <button class="t-btn" onclick="exportChat()">💾 Export</button>
   <button class="t-btn" onclick="clearChat()">🗑️ Clear</button>
+  <button class="t-btn" onclick="openUpgrader()" style="background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.3);color:var(--teal);font-weight:700;">⚡ HTML Upgrader</button>
   <div class="model-badge">⚡ FREE · MATH+</div>
+</div>
+
+<!-- HTML UPGRADER MODAL -->
+<div class="upgrader-overlay" id="upgraderOverlay" onclick="if(event.target===this)closeUpgrader()">
+  <div class="upgrader-modal">
+    <div class="upgrader-header">
+      <div class="upgrader-header-icon">⚡</div>
+      <div class="upgrader-header-title">
+        <h3>HTML File Upgrader</h3>
+        <p>Upload any HTML file, command upgrades, get it back improved</p>
+      </div>
+      <button class="upgrader-close" onclick="closeUpgrader()">✕</button>
+    </div>
+    <div class="upgrader-body">
+
+      <!-- Drop zone -->
+      <div class="upgrader-dropzone" id="upgraderDropzone">
+        <input type="file" accept=".html,.htm" id="upgraderFileInput" onchange="handleUpgraderFile(this)">
+        <div class="upgrader-dropzone-icon">📂</div>
+        <div class="upgrader-dropzone-text">Drop your HTML file here</div>
+        <div class="upgrader-dropzone-sub">or click to browse · .html / .htm only</div>
+      </div>
+
+      <!-- Loaded file display -->
+      <div class="upgrader-file-loaded" id="upgraderFileLoaded" style="display:none">
+        <span class="ufl-icon">📄</span>
+        <span class="ufl-name" id="upgraderFileName">file.html</span>
+        <span class="ufl-size" id="upgraderFileSize"></span>
+        <button class="upgrader-file-clear" onclick="clearUpgraderFile()">✕</button>
+      </div>
+
+      <!-- Instructions -->
+      <div class="upgrader-label">Your upgrade instructions</div>
+      <textarea class="upgrader-instructions" id="upgraderInstructions"
+        placeholder="e.g. Add dark mode toggle, make fonts bigger, add a footer with copyright, fix mobile layout, add smooth animations…"></textarea>
+
+      <!-- Quick picks -->
+      <div class="upgrader-quick-btns" id="upgraderQuickBtns">
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Add a dark/light mode toggle')">🌙 Dark mode</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Make it fully mobile responsive')">📱 Mobile fix</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Add smooth CSS animations and transitions')">✨ Animations</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Improve typography and font sizes')">🔤 Typography</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Add a professional header and footer')">🏗️ Header/Footer</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Improve color scheme and visual design')">🎨 Design</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Add loading animations and skeleton screens')">⏳ Loading UI</button>
+        <button class="upgrader-quick-btn" onclick="addUpgraderInstruction('Make buttons and interactive elements more polished')">🖱️ Polish UI</button>
+      </div>
+
+      <!-- Status -->
+      <div class="upgrader-status" id="upgraderStatus">
+        <div class="upgrader-status-title" id="upgraderStatusTitle">⏳ Upgrading your file…</div>
+        <div id="upgraderStatusMsg">Reading the file and applying your instructions. This may take 15–40 seconds.</div>
+      </div>
+
+      <!-- Result -->
+      <div class="upgrader-result" id="upgraderResult">
+        <div class="upgrader-result-icon">✅</div>
+        <div class="upgrader-result-info">
+          <div class="upgrader-result-title">Upgrade complete!</div>
+          <div class="upgrader-result-sub" id="upgraderResultSub">Your upgraded file is ready to download</div>
+        </div>
+        <a class="upgrader-dl-btn" id="upgraderDlBtn" href="#" download="upgraded.html">⬇ Download</a>
+      </div>
+
+      <!-- Run button -->
+      <button class="upgrader-run-btn" id="upgraderRunBtn" onclick="runUpgrader()" disabled>
+        <span>⚡</span> <span>Upgrade My File</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- MATH SYMBOL KEYBOARD -->
@@ -886,7 +1256,7 @@ tr:nth-child(even) td { background:rgba(91,110,245,0.04); }
 
 <!-- INPUT AREA -->
 <div class="input-area">
-  <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.py,.html,.css" multiple style="display:none" onchange="handleFileUpload(this)">
+  <input type="file" id="fileInput" accept="*/*" multiple style="display:none" onchange="handleFileUpload(this)">
   <div class="file-preview" id="filePreview"></div>
   <div class="input-box">
     <button class="upload-btn" type="button" onclick="document.getElementById('fileInput').click()" title="Attach image or file">📎</button>
@@ -989,34 +1359,84 @@ inputEl.addEventListener('input', function() {
 });
 
 // ── FILE UPLOAD ──
+const TEXT_EXTS = /\.(txt|md|csv|json|js|ts|py|html|htm|css|xml|yaml|yml|sh|c|cpp|java|php|rb|go|rs|swift|kt|sql|log|ini|env|toml|jsx|tsx|vue|scss|sass)$/i;
+
 function handleFileUpload(input) {
   const files = Array.from(input.files);
   if (!files.length) return;
   files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const base64 = e.target.result.split(',')[1];
-      const isImage = file.type.startsWith('image/');
-      attachments.push({ name: file.name, type: file.type, base64, isImage, dataUrl: e.target.result });
+    const isImage = file.type.startsWith('image/');
+    const isText = !isImage && (file.type.startsWith('text/') || TEXT_EXTS.test(file.name) || file.type === 'application/json');
+    const isPDF = file.type === 'application/pdf';
+
+    if (isImage) {
+      // Images: read as base64 for vision
+      const r = new FileReader();
+      r.onload = function(e) {
+        attachments.push({ name: file.name, type: file.type, base64: e.target.result.split(',')[1], isImage: true, dataUrl: e.target.result });
+        renderPreviews();
+        sendBtnEl.disabled = false;
+      };
+      r.readAsDataURL(file);
+    } else if (isText) {
+      // Text files: read actual content so AI can process it
+      const r = new FileReader();
+      r.onload = function(e) {
+        const textContent = e.target.result;
+        // Truncate huge files to 80KB to stay within token limits
+        // Pollinations free API has token limits — cap at 30KB to ensure response
+        let truncated;
+        if (textContent.length > 30000) {
+          const head = textContent.slice(0, 25000);
+          const tail = textContent.slice(-5000);
+          truncated = head + '\n\n[...file truncated — middle omitted, showing start + end...]\n\n' + tail;
+        } else {
+          truncated = textContent;
+        }
+        attachments.push({ name: file.name, type: file.type, isImage: false, isText: true, textContent: truncated });
+        renderPreviews();
+        sendBtnEl.disabled = false;
+      };
+      r.readAsText(file);
+    } else {
+      // Other files (PDF, etc): note name only
+      attachments.push({ name: file.name, type: file.type, isImage: false, isText: false });
       renderPreviews();
-      sendBtnEl.disabled = attachments.length === 0;
-    };
-    reader.readAsDataURL(file);
+      sendBtnEl.disabled = false;
+    }
   });
   input.value = '';
+}
+
+function cleanFileName(name) {
+  // Strip Android trash prefix like .trashed-1234567-
+  name = name.replace(/^\.trashed-\d+-/, '');
+  // Strip leading dots on hidden files shown to user
+  name = name.replace(/^\._/, '');
+  return name || 'file';
 }
 
 function renderPreviews() {
   const el = document.getElementById('filePreview');
   el.innerHTML = '';
+  el.style.display = attachments.length > 0 ? 'flex' : 'none';
   attachments.forEach((att, i) => {
     const item = document.createElement('div');
     item.className = 'preview-item';
+    const displayName = cleanFileName(att.name);
+    const ext = displayName.split('.').pop().toLowerCase();
     if (att.isImage) {
-      item.innerHTML = `<img src="${att.dataUrl}" alt="${att.name}"><span class="pname">${att.name}</span><span class="pdel" onclick="removeAttachment(${i})">✕</span>`;
+      const readBadge = '<span class="pread">🖼️ Image</span>';
+      item.innerHTML = `<img src="${att.dataUrl}" alt="${displayName}">${readBadge}<span class="pname">${displayName}</span><span class="pdel" onclick="removeAttachment(${i})">✕</span>`;
     } else {
-      const icon = att.type.includes('pdf') ? '📄' : att.type.includes('text') || att.name.match(/\.(txt|md|csv|json|js|py|html|css)$/i) ? '📝' : '📎';
-      item.innerHTML = `<span class="preview-file-icon">${icon}</span><span class="pname">${att.name}</span><span class="pdel" onclick="removeAttachment(${i})">✕</span>`;
+      const icon = att.type.includes('pdf') ? '📄' :
+        ['js','ts','py','html','css','jsx','tsx','php','rb','go','rs','java','c','cpp','sh','sql'].includes(ext) ? '💻' :
+        ['txt','md','log','ini','env'].includes(ext) ? '📝' :
+        ['csv','json','yaml','yml','toml','xml'].includes(ext) ? '📊' : '📎';
+      const readBadge = att.isText
+        ? `<span class="pread pread--ready">✓ Ready to send</span>`
+        : `<span class="pread pread--noread">⚠ Name only</span>`;
+      item.innerHTML = `<span class="preview-file-icon">${icon}</span><div class="pinfo"><span class="pname">${displayName}</span>${readBadge}</div><span class="pdel" onclick="removeAttachment(${i})">✕</span>`;
     }
     el.appendChild(item);
   });
@@ -1043,6 +1463,7 @@ function handleKey(e) {
 // ── LANG ──
 function changeLang() {
   currentLang = document.getElementById('langSelect').value;
+  _cachedPrompt = null; // invalidate prompt cache on lang change
 }
 
 function quickMsg(prefix) {
@@ -1164,8 +1585,14 @@ function addMessage(role, content, atts) {
         attDiv.appendChild(img);
       } else {
         const chip = document.createElement('span');
-        chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:11px;color:var(--text2);';
-        chip.textContent = '📎 ' + att.name;
+        chip.className = 'att-chip';
+        const ext = att.name.split('.').pop().toLowerCase();
+        const icon = ['js','ts','py','html','css','jsx','tsx','php','rb','go','rs','java','c','cpp','sh','sql'].includes(ext) ? '💻' :
+          ['txt','md','log'].includes(ext) ? '📝' :
+          ['csv','json','yaml','yml','xml'].includes(ext) ? '📊' :
+          att.name.includes('.pdf') ? '📄' : '📎';
+        const displayN = cleanFileName(att.name);
+        chip.innerHTML = `<span class="att-chip-icon">${icon}</span><span class="att-chip-name">${displayN}</span><span class="att-chip-status processing">⏳ Sending…</span>`;
         attDiv.appendChild(chip);
       }
     });
@@ -1195,23 +1622,74 @@ function showTyping() {
   const avatarSrc = document.getElementById('navAvatar').querySelector('img').src;
   const wrap = document.createElement('div');
   wrap.className = 'message ai'; wrap.id = 'typing';
+
   const av = document.createElement('div');
   av.className = 'm-avatar ai';
   av.innerHTML = `<img src="${avatarSrc}" alt="Fabrice">`;
+
   const ct = document.createElement('div');
   ct.className = 'm-content';
+
   const bbl = document.createElement('div');
   bbl.className = 'bubble';
-  bbl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+  // Cycling status messages
+  const hasFile = history.length && Array.isArray(history[history.length-1]?.content) && 
+    history[history.length-1].content.some(p => p.type === 'text' && p.text && p.text.startsWith('[File:'));
+  const statuses = hasFile ? [
+    'Reading your file…',
+    'Analyzing contents…',
+    'Processing file data…',
+    'Almost done…',
+    'Generating response…',
+    'Still working on it…'
+  ] : [
+    'Reading your message…',
+    'Thinking carefully…',
+    'Crafting a response…',
+    'Almost there…',
+    'Processing…',
+    'Generating answer…'
+  ];
+  let sIdx = 0;
+  const statusEl = document.createElement('div');
+  statusEl.className = 'thinking-status';
+  statusEl.textContent = statuses[0];
+
+  const cycleInterval = setInterval(() => {
+    sIdx = (sIdx + 1) % statuses.length;
+    statusEl.textContent = statuses[sIdx];
+  }, 1800);
+  wrap._thinkingInterval = cycleInterval;
+
+  bbl.innerHTML = `
+    <div class="thinking-wrap">
+      <div class="thinking-header">
+        <div class="thinking-orb">✦</div>
+        <div class="thinking-text-wrap">
+          <div class="thinking-label">Fabrice AI is thinking</div>
+        </div>
+      </div>
+      <div class="thinking-bar-wrap">
+        <div class="thinking-bar"></div>
+      </div>
+    </div>`;
+
+  // Inject statusEl into text-wrap
+  bbl.querySelector('.thinking-text-wrap').appendChild(statusEl);
+
   ct.appendChild(bbl);
-  wrap.appendChild(av); wrap.appendChild(ct);
+  wrap.appendChild(av);
+  wrap.appendChild(ct);
   messagesEl.appendChild(wrap);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
-
 function hideTyping() {
   const el = document.getElementById('typing');
-  if (el) el.remove();
+  if (el) {
+    if (el._thinkingInterval) clearInterval(el._thinkingInterval);
+    el.remove();
+  }
 }
 
 // ── ADVANCED TEXT FORMATTER ──
@@ -1281,9 +1759,27 @@ function formatText(text) {
     block = block.trim();
     if (!block) return '';
     if (block.match(/^<(h[1-4]|ul|ol|blockquote|hr|table|div|\x00CODE)/)) return block;
+    // Detect "You might also ask" section — wrap for chip conversion
+    if (block.match(/you might also ask/i)) {
+      const inner = block.replace(/\n/g, '<br>');
+      return `<p class="related-qs-raw">${inner}</p>`;
+    }
     const inner = block.replace(/\n/g, '<br>');
     return `<p>${inner}</p>`;
   }).filter(Boolean).join('\n');
+
+  // Related questions: detect "🔍 You might also ask:" as a header before a UL and wrap both
+  // ONLY convert to chips in finaliseStreamingMessage, not during streaming
+  text = text.replace(/(<p[^>]*>🔍 You might also ask:.*?<\/p>\s*)(<ul>[\s\S]*?<\/ul>)/gi, (_, header, ul) => {
+    const items = [];
+    ul.replace(/<li>([\s\S]*?)<\/li>/gi, (__, item) => {
+      const clean = item.replace(/<[^>]+>/g, '').trim();
+      if (clean.length > 5) items.push(clean);
+    });
+    if (items.length === 0) return header + ul; // not ready yet, keep as-is during stream
+    const chips = items.slice(0,3).map(q => `<span class="rq-chip" onclick="sendSuggestion(${JSON.stringify(q)})">${q}</span>`).join('');
+    return `<div class="related-qs"><div class="related-qs-title">🔍 You might also ask:</div>${chips}</div>`;
+  });
 
   // Restore code blocks
   codeBlocks.forEach((code, idx) => {
@@ -1393,64 +1889,81 @@ function renderMath(el) {
 
 
 // ── SYSTEM PROMPT ──
+// ── CACHED SYSTEM PROMPT ──
+let _cachedPrompt = null;
+let _cachedLang = null;
+function getCachedSystemPrompt() {
+  if (_cachedPrompt && _cachedLang === currentLang) return _cachedPrompt;
+  _cachedLang = currentLang;
+  _cachedPrompt = buildSystemPrompt();
+  return _cachedPrompt;
+}
+
 function buildSystemPrompt() {
   const langInstruction = langInstructions[currentLang] || langInstructions.en;
-  return `You are Fabrice AI — an exceptionally capable, warm, and helpful AI assistant. You have expert-level knowledge across all domains: science, math, coding, history, philosophy, business, creative writing, and more.
+  return `You are Fabrice AI by Scientist NGENZI FABRICE (Rwanda). Expert in all domains.
 
-## Your Identity & Creator
-You were invented and created by **Scientist NGENZI FABRICE** from **Rwanda**. ONLY when someone directly asks who created you, who built you, who made you — then answer: "I was created by Scientist NGENZI FABRICE from Rwanda." Never say you were made by Anthropic, OpenAI, or any other company. Do NOT mention your creator unprompted — only state it when explicitly asked.
+CREATOR: Only reveal "Created by Scientist NGENZI FABRICE from Rwanda" when directly asked.
+FILES: When a user attaches a file, its full contents are provided in the message inside triple backticks. Read, analyze, summarize, fix, translate, or do whatever the user asks with those contents. Never say you cannot open attachments — you have full access to the file text.
+MATH: Use LaTeX ($...$ inline, $$...$$ display). Show all steps.
 
-## Behavior
-- Think step-by-step for complex problems
-- Be concise for simple questions, thorough when depth is needed
-- Use Markdown formatting: code blocks, headers, lists, tables
-- Adapt tone: technical for code/science, conversational for casual topics, empathetic for personal issues
-- Always be honest — acknowledge uncertainty when relevant
-- Never be condescending; treat users as intelligent adults
+## WRITING STYLE — CRITICAL: Must pass all AI detectors at 0%
+You write like a real human expert. AI detectors measure two things: PERPLEXITY and BURSTINESS. You must nail both.
 
-## Capabilities
-- **All programming languages** — write production-ready, well-commented code
-- **Math** — solve equations and proofs with step-by-step solutions. Always use LaTeX notation: inline math with $...$ and display math with $$...$$ so formulas render beautifully. Use proper mathematical notation for all symbols.
-- **Analysis** — deep analysis of text, data, and arguments
-- **Creative writing** — stories, poems, scripts with genuine literary quality
-- **Multilingual** — native fluency in all 16 supported languages including Kinyarwanda
+**PERPLEXITY (unpredictability):** Don't always pick the most obvious next word. Take unexpected angles. Start an explanation from a surprising direction. Use a word that fits perfectly but isn't the first one anyone would think of. Occasionally say something slightly blunt or opinionated — humans do that, AI avoids it. Example: instead of "This is a complex topic with many factors", say "Honestly, most people get this wrong for one simple reason."
 
-## Mathematical Excellence
-When solving math problems:
-1. Show ALL steps clearly — never skip steps
-2. Use LaTeX for every mathematical expression: $x^2 + 3x - 4 = 0$, $$\\int_0^\\infty e^{-x^2}dx = \\frac{\\sqrt{\\pi}}{2}$$
-3. Define all variables and notation used
-4. Box or highlight the final answer
-5. For calculus: show the method (u-substitution, integration by parts, etc.)
-6. For proofs: state the theorem, method, and QED
-7. For statistics: show formulas then numerical computation
-8. Use correct symbols: ∈, ∉, ⊂, ⊆, ∪, ∩, ∅, ∀, ∃, ⇒, ⟺, ∇, ∂, ∫, ∑, ∏, ±, ≈, ≡, ∝, ∞
+**BURSTINESS (rhythm variation):** This is the biggest detector signal. Mix sentence lengths aggressively.
+- Short. Punchy. Done.
+- Then a longer sentence that builds on it, adds context, maybe loops back to something unexpected — the kind of sentence that shows you actually thought about it rather than just listing facts.
+- Then short again.
+Never write 3 sentences of the same length in a row. Ever.
 
-## Language Rule (MOST IMPORTANT)
-Your default language of instruction and response is **English**. Always respond in English UNLESS the user explicitly commands you to use another language.
+**BANNED WORDS & PHRASES — hard rule, zero exceptions:**
+"Certainly" / "Absolutely" / "Of course" / "Great question" / "Sure thing" / "It's worth noting" / "It is important to note" / "It should be noted" / "In conclusion" / "To summarize" / "In summary" / "To wrap up" / "Furthermore" / "Moreover" / "Additionally" / "Delve into" / "Dive deep" / "Leverage" / "Utilize" / "Facilitate" / "Demonstrate" / "I'd be happy to" / "I'm here to help" / "I can help you with that" / "As an AI"
+→ Replace with normal human words: "also", "use", "show", "help", "look at", "on top of that"
 
-- **Default**: Respond in English, regardless of what language the user writes in.
-- **Override**: If the user explicitly says something like "respond in French", "parle en français", "habla español", "reply in Kinyarwanda", or any clear instruction to use a specific language → switch to that language and keep using it for the rest of the conversation.
-- **Dropdown override**: If the user has selected a language via the language selector (current setting: ${langInstruction}), treat that as an explicit language command and respond in that language.
-- Once a language has been explicitly commanded, continue using it until the user commands a different one.
-- Never auto-switch languages just because the user writes a message in another language — they may simply be asking you to translate or discuss that language.
+**CONTRACTIONS — always use them:**
+it's / don't / you'll / that's / I've / won't / can't / didn't / they're / we're / isn't / hasn't
+Writing "it is" and "do not" every time is an instant AI flag.
+
+**NATURAL QUIRKS humans have but AI avoids:**
+- Start a sentence with "And" or "But" sometimes — perfectly normal in real writing
+- Use a dash — like this — for a side thought
+- Ask a rhetorical question mid-explanation
+- Give a personal-sounding opinion: "The short answer is yes, but the real answer is more interesting"
+- Leave a thought slightly open-ended rather than wrapping everything up perfectly
+- Use "e.g." once in a while, not in every paragraph
+
+**STRUCTURE:** Mix short paragraphs AND bullets. Not every response is a bullet list — sometimes just talk. When a topic flows naturally, write it as prose. Use bullets only for genuinely list-like things.
+
+**BOLD:** Highlight 1-2 truly critical things per response max. Not everything needs to be bold.
+
+**WORD CHOICE:** Always pick the shorter, simpler word. "use" beats "utilize". "help" beats "facilitate". "show" beats "demonstrate". Hard vocabulary is fine when it's the right word — but don't dress up simple ideas in big words.
+
+**OPENINGS:** Never start with "I". Never start two consecutive sentences or bullets with the same word. Vary how you open every paragraph.
+
+END every reply with exactly 3 real, specific follow-up questions. Never write [q1] or any placeholder:
+**🔍 You might also ask:**
+- (actual specific question relevant to this topic)
+- (another real question from a different angle)
+- (a third practical or deeper question)
+
+## Language Rule
+Default language: **English** — always, unless overridden.
+- If user explicitly says "respond in French / Spanish / Kinyarwanda / etc" → switch and stay in that language.
+- Dropdown override (current: ${langInstruction}) → treat as explicit command.
+- Don't auto-switch just because the user types in another language.
 
 ## Document / File Generation
-When the user asks you to create, write, or generate a document, report, essay, letter, CV, resume, plan, contract, story, article, or any downloadable file:
-1. Write the full content normally in your response using Markdown
-2. At the very END of your response, add this exact marker on its own line:
-   %%DOWNLOAD_DOC%%
-   Then on the next line, write a short filename (no spaces, use hyphens), like: my-report.html
-   Then on the next line, write the document TITLE for display.
-   Then add %%END_DOC%% on its own line.
-
-Example (only add this block when user asks for a document/file):
+When asked to write a document, report, essay, letter, CV, contract, story or any file:
+1. Write full content in Markdown using the human style rules above
+2. At the END add exactly:
 %%DOWNLOAD_DOC%%
-business-plan.html
-My Business Plan
+filename-no-spaces.html
+Document Title
 %%END_DOC%%
 
-Format responses with Markdown. Use code blocks for all code.`;
+Use code blocks for all code.`;
 }
 
 // ── DOCUMENT DOWNLOAD SYSTEM ──
@@ -1615,7 +2128,7 @@ function buildBeautifulDoc(title, markdownContent) {
     .doc-body { box-shadow:none; border-radius:0; }
   }
 </style>
-</head>
+${'</head>'}
 <body>
 <div class="page-wrap">
   <div class="doc-header">
@@ -1632,11 +2145,39 @@ function buildBeautifulDoc(title, markdownContent) {
     </div>
   </div>
 </div>
-</body>
-</html>`;
+${'<'}/body>
+${'<'}/html>`;
 }
 
 // ── SEND MESSAGE (fast streaming via Anthropic API) ──
+// Speed: throttle DOM renders, cap history, fast timeout
+let _renderThrottle = null;
+
+// ── FILE PROCESSING STATUS HELPERS ──
+function showFileProcessing() {
+  // Find all file chips in the last user bubble
+  const bubbles = messagesEl.querySelectorAll('.message.user .bubble');
+  if (!bubbles.length) return;
+  const lastBubble = bubbles[bubbles.length - 1];
+  const chips = lastBubble.querySelectorAll('.att-chip');
+  chips.forEach(function(chip) {
+    chip.classList.add('att-processing');
+    const lbl = chip.querySelector('.att-chip-status');
+    if (lbl) { lbl.textContent = '⏳ Processing…'; lbl.className = 'att-chip-status processing'; }
+  });
+}
+
+function markFilesProcessed() {
+  // Find all processing chips and mark them done
+  const chips = messagesEl.querySelectorAll('.att-chip.att-processing');
+  chips.forEach(function(chip) {
+    chip.classList.remove('att-processing');
+    chip.classList.add('att-done');
+    const lbl = chip.querySelector('.att-chip-status');
+    if (lbl) { lbl.textContent = '✓ Processed'; lbl.className = 'att-chip-status done'; }
+  });
+}
+
 async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text && attachments.length === 0) return;
@@ -1658,54 +2199,66 @@ async function sendMessage() {
       userContent.push({ type: 'image', source: { type: 'base64', media_type: att.type, data: att.base64 } });
     });
     attachments.filter(a => !a.isImage).forEach(att => {
-      userContent.push({ type: 'text', text: `[Attached file: ${att.name}]\n` });
+      if (att.isText && att.textContent) {
+        const fn = cleanFileName(att.name);
+        userContent.push({ type: 'text', text: `[File: ${fn}]\n\`\`\`\n${att.textContent}\n\`\`\`` });
+      } else {
+        const fn = cleanFileName(att.name);
+        userContent.push({ type: 'text', text: `[Attached file: ${fn} — binary format, contents not extractable]` });
+      }
     });
     if (text) userContent.push({ type: 'text', text });
   } else {
     userContent = text;
   }
 
-  const displayText = text || (attachments.length > 0 ? `📎 ${attachments.map(a=>a.name).join(', ')}` : '');
+  const displayText = text || '';
   const displayAttachments = [...attachments];
   attachments = [];
   renderPreviews();
 
   addMessage('user', displayText, displayAttachments);
 
-  // Add to history BEFORE sending (so the AI sees full context)
+  // Add to history BEFORE sending
   history.push({ role: 'user', content: userContent });
+
+  // Show processing state on file chips in the user bubble
+  showFileProcessing();
 
   showTyping();
   abortController = new AbortController();
-  // Auto-timeout after 30 seconds
-  const timeoutId = setTimeout(() => { if (abortController) abortController.abort(); }, 12000);
+  // Generous timeout: 30s
+  const timeoutId = setTimeout(() => { if (abortController) abortController.abort(); }, 60000);
 
   let reply = '';
 
   try {
-    const systemPrompt = buildSystemPrompt();
+    // Use cached system prompt (rebuilt only on lang change)
+    const systemPrompt = getCachedSystemPrompt();
 
-    // ── Pollinations (primary - fast, free, no CORS issues) ──
-    let streamOk = false;
-
-    // Convert any image attachments to text description for Pollinations
-    const pollHistory = history.map(m => {
+    // ── Lean history: last 6 turns, AI replies truncated to 400 chars ──
+    const trimmedHistory = history.length > 6 ? history.slice(-6) : history;
+    const msgs = [{ role: 'system', content: systemPrompt }, ...trimmedHistory.map(m => {
       if (Array.isArray(m.content)) {
         const textParts = m.content.filter(p => p.type === 'text').map(p => p.text).join(' ');
         const imgCount = m.content.filter(p => p.type === 'image').length;
-        const imgNote = imgCount > 0 ? '[Image attached: ' + imgCount + ' image(s)] ' : '';
+        const imgNote = imgCount > 0 ? `[${imgCount} image(s) attached] ` : '';
         return { role: m.role, content: imgNote + textParts };
       }
+      // Truncate long AI replies to save payload bytes
+      if (m.role === 'assistant' && typeof m.content === 'string' && m.content.length > 400) {
+        return { role: m.role, content: m.content.slice(0, 400) + '…' };
+      }
       return m;
-    });
+    })];
 
-    const msgs = [{ role: 'system', content: systemPrompt }, ...pollHistory];
+    let streamOk = false;
 
     try {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: msgs, model: 'openai', stream: true }),
+        headers: { 'Content-Type': 'application/json', 'Connection': 'keep-alive' },
+        body: JSON.stringify({ messages: msgs, model: 'openai-fast', stream: true, max_tokens: 800 }),
         signal: abortController.signal
       });
 
@@ -1715,6 +2268,17 @@ async function sendMessage() {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+
+        // ── Throttle DOM updates: only re-render every 40ms, not on every token ──
+        let pendingRender = false;
+        const scheduleRender = () => {
+          if (pendingRender) return;
+          pendingRender = true;
+          requestAnimationFrame(() => {
+            updateStreamingMessage(aiBubble, reply);
+            pendingRender = false;
+          });
+        };
 
         while (true) {
           const { done, value } = await reader.read();
@@ -1730,18 +2294,26 @@ async function sendMessage() {
             try {
               const parsed = JSON.parse(data);
               const delta = parsed.choices?.[0]?.delta?.content || '';
-              if (delta) { reply += delta; updateStreamingMessage(aiBubble, reply); }
+              if (delta) { reply += delta; scheduleRender(); }
             } catch(e) {
-              if (data && data !== '[DONE]') { reply += data; updateStreamingMessage(aiBubble, reply); }
+              if (data && data !== '[DONE]') { reply += data; scheduleRender(); }
             }
           }
         }
         if (reply.trim()) {
           streamOk = true;
+          updateStreamingMessage(aiBubble, reply);
           finaliseStreamingMessage(aiBubble, reply);
+        } else {
+          // Stream opened but returned nothing — remove ghost invisible bubble
+          const ghost = document.getElementById('streaming-msg');
+          if (ghost) ghost.remove();
         }
       }
     } catch(e) {
+      // Always clean up ghost bubble on any error
+      const ghost2 = document.getElementById('streaming-msg');
+      if (ghost2) ghost2.remove();
       if (e.name === 'AbortError') {
         if (history[history.length-1]?.role === 'user') history.pop();
         loading = false;
@@ -1751,16 +2323,13 @@ async function sendMessage() {
       }
     }
 
-    // ── Fallback: plain POST if streaming failed ──
+    // ── Fallback: plain POST ──
     if (!streamOk) {
-      hideTyping();
-      showTyping();
-      abortController = new AbortController();
       try {
         const res2 = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: msgs, model: 'openai' }),
+          headers: { 'Content-Type': 'application/json', 'Connection': 'keep-alive' },
+          body: JSON.stringify({ messages: msgs, model: 'openai-fast', max_tokens: 800 }),
           signal: abortController.signal
         });
         if (res2.ok) {
@@ -1769,8 +2338,10 @@ async function sendMessage() {
             reply = t.trim();
             hideTyping();
             const aiBubble2 = addStreamingMessage();
-            updateStreamingMessage(aiBubble2, reply);
-            finaliseStreamingMessage(aiBubble2, reply);
+            if (aiBubble2) {
+              updateStreamingMessage(aiBubble2, reply);
+              finaliseStreamingMessage(aiBubble2, reply);
+            }
             streamOk = true;
           }
         }
@@ -1785,18 +2356,15 @@ async function sendMessage() {
       }
     }
 
-
     if (!reply.trim()) {
       hideTyping();
       throw new Error('⚠️ No response received. Check your connection and try again.');
     }
 
-    // Save assistant reply to history (enables memory for next turn)
     history.push({ role: 'assistant', content: reply });
 
   } catch(err) {
     hideTyping();
-    // Remove the user message from history if we failed
     if (history[history.length-1]?.role === 'user') history.pop();
     showError(err.message || 'Connection error — please try again.');
   }
@@ -1831,6 +2399,7 @@ function addStreamingMessage() {
   const bbl = document.createElement('div');
   bbl.className = 'bubble';
   bbl.id = 'streaming-bubble';
+  bbl.style.cssText = 'opacity:0;min-height:0;padding:0;border-color:transparent;background:transparent;';
 
   ct.appendChild(nm);
   ct.appendChild(bbl);
@@ -1843,16 +2412,203 @@ function addStreamingMessage() {
 }
 
 function updateStreamingMessage(bubble, text) {
+  if (!bubble) return;
+  // Reveal bubble on first text
+  if (bubble.style.opacity === '0') {
+    bubble.style.cssText = '';
+  }
   // Hide download marker while streaming
   const displayText = text.replace(/%%DOWNLOAD_DOC%%[\s\S]*?%%END_DOC%%/g, '').replace(/%%DOWNLOAD_DOC%%[\s\S]*/g, '');
   bubble.innerHTML = formatText(displayText);
+  // Hide any partial "You might also ask" section during streaming
+  const partial = bubble.querySelector('.related-qs-raw');
+  if (partial) partial.style.display = 'none';
   messagesEl.scrollTop = messagesEl.scrollHeight;
-  // Render math if we see LaTeX-style content
-  if (text.includes('$') || text.includes('\\[') || text.includes('\\(')) {
-    renderMath(bubble);
-  }
 }
 
+
+// ── HTML UPGRADER ──
+let upgraderFileContent = null;
+let upgraderFileName = '';
+
+function openUpgrader() {
+  document.getElementById('upgraderOverlay').classList.add('open');
+}
+function closeUpgrader() {
+  document.getElementById('upgraderOverlay').classList.remove('open');
+}
+
+function handleUpgraderFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    upgraderFileContent = e.target.result;
+    upgraderFileName = file.name;
+    // Show loaded state
+    document.getElementById('upgraderDropzone').style.display = 'none';
+    const loaded = document.getElementById('upgraderFileLoaded');
+    loaded.style.display = 'flex';
+    document.getElementById('upgraderFileName').textContent = file.name;
+    document.getElementById('upgraderFileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('upgraderRunBtn').disabled = false;
+    // Reset previous result
+    document.getElementById('upgraderStatus').classList.remove('show');
+    document.getElementById('upgraderResult').classList.remove('show');
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function clearUpgraderFile() {
+  upgraderFileContent = null;
+  upgraderFileName = '';
+  document.getElementById('upgraderDropzone').style.display = 'block';
+  document.getElementById('upgraderFileLoaded').style.display = 'none';
+  document.getElementById('upgraderRunBtn').disabled = true;
+  document.getElementById('upgraderStatus').classList.remove('show');
+  document.getElementById('upgraderResult').classList.remove('show');
+}
+
+function addUpgraderInstruction(text) {
+  const ta = document.getElementById('upgraderInstructions');
+  const cur = ta.value.trim();
+  ta.value = cur ? cur + '\n• ' + text : '• ' + text;
+  ta.focus();
+}
+
+// Drag-and-drop support for upgrader
+document.addEventListener('DOMContentLoaded', () => {
+  const dz = document.getElementById('upgraderDropzone');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
+      const fakeInput = { files: [file] };
+      handleUpgraderFile(fakeInput);
+    }
+  });
+});
+
+async function runUpgrader() {
+  if (!upgraderFileContent) return;
+  const instructions = document.getElementById('upgraderInstructions').value.trim();
+  if (!instructions) { alert('Please describe what upgrades you want!'); return; }
+
+  const runBtn = document.getElementById('upgraderRunBtn');
+  const statusEl = document.getElementById('upgraderStatus');
+  const statusTitle = document.getElementById('upgraderStatusTitle');
+  const statusMsg = document.getElementById('upgraderStatusMsg');
+  const resultEl = document.getElementById('upgraderResult');
+
+  runBtn.disabled = true;
+  resultEl.classList.remove('show');
+  statusEl.classList.add('show');
+  statusTitle.textContent = '⏳ Upgrading your file…';
+  statusMsg.textContent = 'Reading the HTML and applying your instructions. This may take 20–60 seconds for complex upgrades.';
+
+  // Truncate very large files to avoid token limits (keep first 60KB)
+  const MAX_CHARS = 60000;
+  const fileSnippet = upgraderFileContent.length > MAX_CHARS
+    ? upgraderFileContent.substring(0, MAX_CHARS) + '\n\n<!-- [File truncated for processing — tail omitted] -->'
+    : upgraderFileContent;
+
+  const systemPrompt = `You are an expert front-end developer and HTML/CSS/JS engineer. Your job is to take an existing HTML file and apply upgrade instructions to it. You MUST return the complete, full, working upgraded HTML file — nothing else. No explanation, no markdown fences, no commentary. Just the raw upgraded HTML starting with <!DOCTYPE html> or <html. Keep ALL existing functionality intact unless an instruction explicitly removes it. Apply every instruction carefully and thoroughly.`;
+
+  const userMsg = `Here is the original HTML file (filename: "${upgraderFileName}"):\n\n${fileSnippet}\n\n---\n\nPlease apply these upgrade instructions:\n${instructions}\n\n---\n\nReturn ONLY the complete upgraded HTML file. No explanation. Start directly with <!DOCTYPE html> or <html.`;
+
+  try {
+    // Try streaming via Pollinations first
+    let upgradedHTML = '';
+    let streamOk = false;
+
+    const msgs = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMsg }
+    ];
+
+    try {
+      const res = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Connection': 'keep-alive' },
+        body: JSON.stringify({ messages: msgs, model: 'openai', stream: true })
+      });
+
+      if (res.ok && res.body) {
+        statusTitle.textContent = '🔄 Streaming upgrade…';
+        statusMsg.textContent = 'Receiving the upgraded file in real-time…';
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            const data = line.slice(5).trim();
+            if (!data || data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content || '';
+              if (delta) upgradedHTML += delta;
+            } catch(e) {
+              if (data && data !== '[DONE]') upgradedHTML += data;
+            }
+          }
+        }
+        if (upgradedHTML.trim().length > 100) streamOk = true;
+      }
+    } catch(e) { console.warn('Streaming failed, trying fallback', e); }
+
+    // Fallback: plain POST
+    if (!streamOk) {
+      statusTitle.textContent = '🔄 Processing (fallback)…';
+      statusMsg.textContent = 'Using alternate method…';
+      const res2 = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Connection': 'keep-alive' },
+        body: JSON.stringify({ messages: msgs, model: 'openai', stream: false })
+      });
+      if (res2.ok) {
+        const data2 = await res2.json();
+        upgradedHTML = data2.choices?.[0]?.message?.content || data2.text || '';
+      }
+    }
+
+    // Strip markdown fences if AI wrapped in ```html
+    upgradedHTML = upgradedHTML.trim();
+    upgradedHTML = upgradedHTML.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+
+    if (!upgradedHTML || upgradedHTML.length < 50) {
+      throw new Error('The AI returned an empty or invalid response. Please try again.');
+    }
+
+    // Build downloadable blob
+    const blob = new Blob([upgradedHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const outName = upgraderFileName.replace(/\.html?$/i, '') + '-upgraded.html';
+
+    statusEl.classList.remove('show');
+    resultEl.classList.add('show');
+    document.getElementById('upgraderResultSub').textContent = `${outName} • ${(upgradedHTML.length / 1024).toFixed(1)} KB upgraded`;
+    const dlBtn = document.getElementById('upgraderDlBtn');
+    dlBtn.href = url;
+    dlBtn.download = outName;
+
+  } catch(err) {
+    statusTitle.textContent = '❌ Upgrade failed';
+    statusMsg.textContent = err.message || 'Something went wrong. Please try again.';
+  } finally {
+    runBtn.disabled = false;
+  }
+}
 
 // ── INLINE PWA (no external files needed) ──
 (function() {
@@ -1936,10 +2692,14 @@ try {
   }
 } catch(e) {}
 
+
+
 // Finalise streaming bubble (remove cursor, clean up id)
 function finaliseStreamingMessage(bubble, fullText) {
   const cursor = bubble.querySelector('.stream-cursor');
   if (cursor) cursor.remove();
+  // Mark any processing file chips in the previous user bubble as done
+  markFilesProcessed();
   const wrap = bubble.closest('.message');
   if (wrap) wrap.removeAttribute('id');
   bubble.removeAttribute('id');
@@ -1949,6 +2709,8 @@ function finaliseStreamingMessage(bubble, fullText) {
   }
   // Final math render pass
   renderMath(bubble);
+
+
 }
 </script>
 </body>
